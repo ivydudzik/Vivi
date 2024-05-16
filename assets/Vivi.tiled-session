@@ -1,0 +1,50 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "1bit_platformer-level-1.tmj",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "fileStates": {
+        "": {
+            "scaleInDock": 2,
+            "scaleInEditor": 1
+        },
+        "1bit_platformer-level-1.tmj": {
+            "scale": 3,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 945.6666666666665,
+                "y": 359.83333333333337
+            }
+        },
+        "1bit_platformer-level-1.tmj#kenny_monochrome_tilemap_packed": {
+            "scaleInDock": 1.5
+        },
+        "1bit_platformer-level-1.tmj#kenny_monochrome_tilemap_transparent": {
+            "scaleInEditor": 1
+        }
+    },
+    "last.exportedFilePath": "C:/Users/batmi/OneDrive/Documents/GitHub/Vivi/assets",
+    "last.imagePath": "C:/Users/batmi/OneDrive/Documents/GitHub/Vivi/assets",
+    "map.height": 40,
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
+    "map.lastUsedFormat": "json",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 120,
+    "openFiles": [
+        "1bit_platformer-level-1.tmj"
+    ],
+    "project": "Vivi.tiled-project",
+    "recentFiles": [
+        "1bit_platformer-level-1.tmj"
+    ],
+    "tileset.embedInMap": true,
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}
