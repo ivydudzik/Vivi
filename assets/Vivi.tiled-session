@@ -7,6 +7,7 @@
     "expandedProjectPaths": [
         "."
     ],
+    "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "": {
             "scaleInDock": 2,
@@ -16,8 +17,8 @@
             "scale": 3,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 945.6666666666665,
-                "y": 359.83333333333337
+                "x": 945.1666666666666,
+                "y": 359.5
             }
         },
         "1bit_platformer-level-1.tmj#kenny_monochrome_tilemap_packed": {
@@ -39,6 +40,7 @@
         "1bit_platformer-level-1.tmj"
     ],
     "project": "Vivi.tiled-project",
+    "property.type": "bool",
     "recentFiles": [
         "1bit_platformer-level-1.tmj"
     ],
