@@ -6,19 +6,24 @@ class Platformer extends Phaser.Scene {
     init() {
         // variables and settings
         this.playerSettings = {
-            "blue_": { ACCELERATION: 200, DRAG: 600, GRAVITY: 1250, JUMP_VELOCITY: -350, MAX_VELOCITY: 200 },
-            "green_": { ACCELERATION: 200, DRAG: 300, GRAVITY: 400, JUMP_VELOCITY: -50, MAX_VELOCITY: 600 },
-            "red_": { ACCELERATION: 50, DRAG: 750, GRAVITY: 2250, JUMP_VELOCITY: -600, MAX_VELOCITY: 500 },
-            "purple_": { ACCELERATION: 400, DRAG: 750, GRAVITY: 1250, JUMP_VELOCITY: -250, MAX_VELOCITY: 700 }
+            "blue_": { GROUND_ACCELERATION: 200, AIR_ACCELERATION: 25, DRAG: 750, GRAVITY: 1250, JUMP_VELOCITY: -350, MAX_VELOCITY: 200 },
+            "green_": { GROUND_ACCELERATION: 100, AIR_ACCELERATION: 300, DRAG: 300, GRAVITY: 400, JUMP_VELOCITY: -50, MAX_VELOCITY: 500 },
+            "red_": { GROUND_ACCELERATION: 50, AIR_ACCELERATION: 50, DRAG: 750, GRAVITY: 2250, JUMP_VELOCITY: -600, MAX_VELOCITY: 400 },
+            "purple_": { GROUND_ACCELERATION: 800, AIR_ACCELERATION: 25, DRAG: 750, GRAVITY: 1250, JUMP_VELOCITY: -250, MAX_VELOCITY: 600 }
         };
-        // DRAG < ACCELERATION = icy slide
-        // this.MAX_SPEED = 3000;
+        // DRAG < GROUND_ACCELERATION = icy slide
+
+        this.TURNING_MULTIPLIER = 2;
+
         this.PARTICLE_VELOCITY = 50;
         this.SCALE = 2.0;
 
+        this.isGrounded = false;
+
+
         // Slow-mo speed (higher is slower)
         this.SLOWMO_SPEED = 4;
-        this.slowmo = false;
+        this.isSlowmo = false;
     }
 
     create() {
@@ -92,7 +97,7 @@ class Platformer extends Phaser.Scene {
         this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 
         // set up player avatar
-        my.sprite.player = this.physics.add.sprite(1000, 200, "tilemap_sheet");
+        my.sprite.player = this.physics.add.sprite(30, 200, "tilemap_sheet");
         my.sprite.player.setCollideWorldBounds(true);
 
         // Enable collision handling
@@ -109,12 +114,14 @@ class Platformer extends Phaser.Scene {
         this.physics.add.overlap(my.sprite.player, this.yellyGroup, (obj1, obj2) => {
             // obj1.destroy(); // remove player on overlap
             console.log("You lose!");
+            this.scene.restart();
         });
 
         // Handle collision detection with ory enemies
         this.physics.add.overlap(my.sprite.player, this.orysGroup, (obj1, obj2) => {
             // obj1.destroy(); // remove player on overlap
             console.log("You lose!");
+            this.scene.restart();
         });
 
 
@@ -144,12 +151,12 @@ class Platformer extends Phaser.Scene {
         }, this);
 
         this.input.keyboard.on('keydown-SPACE', () => {
-            if (this.slowmo) {
+            if (this.isSlowmo) {
                 this.modulateTimeScale(1);
-                this.slowmo = false;
+                this.isSlowmo = false;
             } else {
                 this.modulateTimeScale(this.SLOWMO_SPEED);
-                this.slowmo = true;
+                this.isSlowmo = true;
             }
         }, this);
 
@@ -203,7 +210,7 @@ class Platformer extends Phaser.Scene {
     }
 
     update() {
-        if (this.slowmo) {
+        if (this.isSlowmo) {
             my.sprite.player.anims.timeScale = 1 / this.SLOWMO_SPEED;
             for (let enemy of this.orysGroup.getChildren()) {
                 enemy.anims.timeScale = 1 / this.SLOWMO_SPEED;
@@ -216,10 +223,20 @@ class Platformer extends Phaser.Scene {
         let playerType = this.playerSettings[this.colorState]
         this.physics.world.gravity.y = playerType.GRAVITY;
         my.sprite.player.setMaxVelocity(playerType.MAX_VELOCITY, 3000)
+
+        // this is coded in such a way where the bonus accel will only apply after the first frame of turning
+        let isTurning = Math.abs(my.sprite.player.body.acceleration.x * my.sprite.player.body.velocity.x) != my.sprite.player.body.acceleration.x * my.sprite.player.body.velocity.x;
+
+        let currentAcceleration = this.isGrounded ? playerType.GROUND_ACCELERATION : playerType.AIR_ACCELERATION;
+
         if (cursors.left.isDown) {
             // set accel to higher if player is moving in opposite direction
             // if facing other direction, acceleration is 1.5x
-            my.sprite.player.setAccelerationX(-playerType.ACCELERATION);
+            if (isTurning) {
+                my.sprite.player.setAccelerationX(-currentAcceleration * this.TURNING_MULTIPLIER);
+            } else {
+                my.sprite.player.setAccelerationX(-currentAcceleration);
+            }
 
             my.sprite.player.setFlip(true, false);
             my.sprite.player.anims.play(this.colorState + 'walk', true);
@@ -236,7 +253,12 @@ class Platformer extends Phaser.Scene {
             }
 
         } else if (cursors.right.isDown) {
-            my.sprite.player.setAccelerationX(playerType.ACCELERATION);
+            if (isTurning) {
+                my.sprite.player.setAccelerationX(currentAcceleration * this.TURNING_MULTIPLIER);
+            } else {
+                my.sprite.player.setAccelerationX(currentAcceleration);
+            }
+
             my.sprite.player.resetFlip();
             my.sprite.player.anims.play(this.colorState + 'walk', true);
 
@@ -271,13 +293,19 @@ class Platformer extends Phaser.Scene {
         // note that we need body.blocked rather than body.touching b/c the former applies to tilemap tiles and the latter to the "ground"
         if (!my.sprite.player.body.blocked.down) {
             my.sprite.player.anims.play(this.colorState + 'jump');
+            this.isGrounded = false;
+        } else {
+            this.isGrounded = true;
         }
+
+
         if (my.sprite.player.body.blocked.down && Phaser.Input.Keyboard.JustDown(cursors.up)) {
             my.sprite.player.body.setVelocityY(playerType.JUMP_VELOCITY);
         }
 
         if (my.sprite.player.body.position.y >= this.map.heightInPixels - 16) {
             console.log("You lose!");
+            this.scene.restart();
             console.log(my.sprite.player.body.position.y);
         }
 
