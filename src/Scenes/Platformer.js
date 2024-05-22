@@ -5,18 +5,26 @@ class Platformer extends Phaser.Scene {
 
     init() {
         // variables and settings
-        this.ACCELERATION = 400;
-        this.DRAG = 500;    // DRAG < ACCELERATION = icy slide
-        this.physics.world.gravity.y = 1500;
-        this.JUMP_VELOCITY = -600;
+        this.playerSettings = {
+            "blue_": { ACCELERATION: 200, DRAG: 600, GRAVITY: 1250, JUMP_VELOCITY: -350, MAX_VELOCITY: 200 },
+            "green_": { ACCELERATION: 200, DRAG: 300, GRAVITY: 400, JUMP_VELOCITY: -50, MAX_VELOCITY: 600 },
+            "red_": { ACCELERATION: 50, DRAG: 750, GRAVITY: 2250, JUMP_VELOCITY: -600, MAX_VELOCITY: 500 },
+            "purple_": { ACCELERATION: 400, DRAG: 750, GRAVITY: 1250, JUMP_VELOCITY: -250, MAX_VELOCITY: 700 }
+        };
+        // DRAG < ACCELERATION = icy slide
+        // this.MAX_SPEED = 3000;
         this.PARTICLE_VELOCITY = 50;
         this.SCALE = 2.0;
+
+        // Slow-mo speed (higher is slower)
+        this.SLOWMO_SPEED = 4;
+        this.slowmo = false;
     }
 
     create() {
         // Create a new tilemap game object which uses 18x18 pixel tiles, and is
         // 45 tiles wide and 25 tiles tall.
-        this.map = this.add.tilemap("platformer-level-1", 18, 18, 45, 25);
+        this.map = this.add.tilemap("1bit_platformer-level-1", 16, 16, 200, 40);
 
         // Add a tileset to the map
         // First parameter: name we gave the tileset in Tiled
@@ -51,22 +59,40 @@ class Platformer extends Phaser.Scene {
         this.coins = this.map.createFromObjects("Objects", {
             name: "coin",
             key: "tilemap_sheet",
-            frame: 151
+            frame: 102
         });
 
+        this.yellys = this.map.createFromObjects("Objects", {
+            name: "yelly",
+            key: "tilemap_sheet",
+            frame: 320
+        });
+
+        this.orys = this.map.createFromObjects("Objects", {
+            name: "ory",
+            key: "tilemap_sheet",
+            frame: 340
+        });
 
 
         // Since createFromObjects returns an array of regular Sprites, we need to convert 
         // them into Arcade Physics sprites (STATIC_BODY, so they don't move) 
         this.physics.world.enable(this.coins, Phaser.Physics.Arcade.STATIC_BODY);
 
+        this.physics.world.enable(this.yellys, Phaser.Physics.Arcade.STATIC_BODY);
+        this.physics.world.enable(this.orys, Phaser.Physics.Arcade.STATIC_BODY);
+
         // Create a Phaser group out of the array this.coins
         // This will be used for collision detection below.
         this.coinGroup = this.add.group(this.coins);
 
+        this.yellyGroup = this.add.group(this.yellys);
+        this.orysGroup = this.add.group(this.orys);
+
+        this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 
         // set up player avatar
-        my.sprite.player = this.physics.add.sprite(30, 200, "platformer_characters", "tile_0000.png");
+        my.sprite.player = this.physics.add.sprite(1000, 200, "tilemap_sheet");
         my.sprite.player.setCollideWorldBounds(true);
 
         // Enable collision handling
@@ -77,6 +103,18 @@ class Platformer extends Phaser.Scene {
         // Handle collision detection with coins
         this.physics.add.overlap(my.sprite.player, this.coinGroup, (obj1, obj2) => {
             obj2.destroy(); // remove coin on overlap
+        });
+
+        // Handle collision detection with yelly enemies
+        this.physics.add.overlap(my.sprite.player, this.yellyGroup, (obj1, obj2) => {
+            // obj1.destroy(); // remove player on overlap
+            console.log("You lose!");
+        });
+
+        // Handle collision detection with ory enemies
+        this.physics.add.overlap(my.sprite.player, this.orysGroup, (obj1, obj2) => {
+            // obj1.destroy(); // remove player on overlap
+            console.log("You lose!");
         });
 
 
@@ -91,18 +129,43 @@ class Platformer extends Phaser.Scene {
             this.physics.world.debugGraphic.clear()
         }, this);
 
+        // Player Type Switcher
+        this.input.keyboard.on('keydown-ONE', () => {
+            this.colorState = "blue_";
+        }, this);
+        this.input.keyboard.on('keydown-TWO', () => {
+            this.colorState = "green_";
+        }, this);
+        this.input.keyboard.on('keydown-THREE', () => {
+            this.colorState = "red_";
+        }, this);
+        this.input.keyboard.on('keydown-FOUR', () => {
+            this.colorState = "purple_";
+        }, this);
+
+        this.input.keyboard.on('keydown-SPACE', () => {
+            if (this.slowmo) {
+                this.modulateTimeScale(1);
+                this.slowmo = false;
+            } else {
+                this.modulateTimeScale(this.SLOWMO_SPEED);
+                this.slowmo = true;
+            }
+        }, this);
+
+
         // movement vfx
 
         my.vfx.walking = this.add.particles(0, 5, "kenny-particles", {
             frame: ['smoke_03.png', 'smoke_09.png'],
             // TODO: Try: add random: true
             random: true,
-            scale: { start: 0.006, end: 0.02 },
+            scale: { start: 0.002, end: 0.01 },
             // TODO: Try: maxAliveParticles: 8,
-            maxAliveParticles: 32,
-            lifespan: 350,
+            maxAliveParticles: 300,
+            lifespan: 250 / this.time.timeScale,
             // TODO: Try: gravityY: -400,
-            gravityY: -100,
+            gravityY: -100 * this.time.timeScale,
             alpha: { start: 1, end: 0.1 },
         });
 
@@ -110,21 +173,60 @@ class Platformer extends Phaser.Scene {
 
 
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
+        my.sprite.debug = this.add.sprite(30, this.map.heightInPixels, "tilemap_sheet");
+        my.sprite.debug = this.add.sprite(60, this.map.heightInPixels, "tilemap_sheet");
         this.cameras.main.startFollow(my.sprite.player, true, 0.25, 0.25); // (target, [,roundPixels][,lerpX][,lerpY])
         this.cameras.main.setDeadzone(50, 50);
         this.cameras.main.setZoom(this.SCALE);
 
+        this.colorState = "blue_";
+
+        for (let enemy of this.orysGroup.getChildren()) {
+            enemy.anims.play("ory_fly");
+        }
+        for (let enemy of this.yellyGroup.getChildren()) {
+            enemy.anims.play("yelly_fly");
+        }
+    }
+
+    modulateTimeScale(timeScale) {
+        this.physics.world.timeScale = timeScale;
+        this.tweens.timeScale = timeScale;
+        this.time.timeScale = 1 / timeScale;
+        my.sprite.player.anims.timeScale = 1 / timeScale;
+        for (let enemy of this.orysGroup.getChildren()) {
+            enemy.anims.timeScale = 1 / timeScale;
+        }
+        for (let enemy of this.yellyGroup.getChildren()) {
+            enemy.anims.timeScale = 1 / timeScale;
+        }
     }
 
     update() {
+        if (this.slowmo) {
+            my.sprite.player.anims.timeScale = 1 / this.SLOWMO_SPEED;
+            for (let enemy of this.orysGroup.getChildren()) {
+                enemy.anims.timeScale = 1 / this.SLOWMO_SPEED;
+            }
+            for (let enemy of this.yellyGroup.getChildren()) {
+                enemy.anims.timeScale = 1 / this.SLOWMO_SPEED;
+            }
+        }
+
+        let playerType = this.playerSettings[this.colorState]
+        this.physics.world.gravity.y = playerType.GRAVITY;
+        my.sprite.player.setMaxVelocity(playerType.MAX_VELOCITY, 3000)
         if (cursors.left.isDown) {
-            my.sprite.player.setAccelerationX(-this.ACCELERATION);
-            my.sprite.player.resetFlip();
-            my.sprite.player.anims.play('walk', true);
+            // set accel to higher if player is moving in opposite direction
+            // if facing other direction, acceleration is 1.5x
+            my.sprite.player.setAccelerationX(-playerType.ACCELERATION);
+
+            my.sprite.player.setFlip(true, false);
+            my.sprite.player.anims.play(this.colorState + 'walk', true);
 
             my.vfx.walking.startFollow(my.sprite.player, my.sprite.player.displayWidth / 2 - 10, my.sprite.player.displayHeight / 2 - 5, false);
 
-            my.vfx.walking.setParticleSpeed(this.PARTICLE_VELOCITY, 0);
+            my.vfx.walking.setParticleSpeed(this.PARTICLE_VELOCITY * this.time.timeScale, 0);
 
             // Only play smoke effect if touching the ground
             if (my.sprite.player.body.blocked.down) {
@@ -134,13 +236,13 @@ class Platformer extends Phaser.Scene {
             }
 
         } else if (cursors.right.isDown) {
-            my.sprite.player.setAccelerationX(this.ACCELERATION);
-            my.sprite.player.setFlip(true, false);
-            my.sprite.player.anims.play('walk', true);
+            my.sprite.player.setAccelerationX(playerType.ACCELERATION);
+            my.sprite.player.resetFlip();
+            my.sprite.player.anims.play(this.colorState + 'walk', true);
 
             my.vfx.walking.startFollow(my.sprite.player, my.sprite.player.displayWidth / 2 - 10, my.sprite.player.displayHeight / 2 - 5, false);
 
-            my.vfx.walking.setParticleSpeed(this.PARTICLE_VELOCITY, 0);
+            my.vfx.walking.setParticleSpeed(this.PARTICLE_VELOCITY * this.time.timeScale, 0);
 
             // Only play smoke effect if touching the ground
             if (my.sprite.player.body.blocked.down) {
@@ -152,20 +254,31 @@ class Platformer extends Phaser.Scene {
             }
 
         } else {
-            // Set acceleration to 0 and have DRAG take over
+            // Set acceleration to 0
             my.sprite.player.setAccelerationX(0);
-            my.sprite.player.setDragX(this.DRAG);
-            my.sprite.player.anims.play('idle');
+            // cause drag
+            my.sprite.player.setDragX(playerType.DRAG);
+            my.sprite.player.anims.play(this.colorState + 'idle');
             my.vfx.walking.stop();
         }
+
+
+
+        // cause drag
+        my.sprite.player.setDragX(playerType.DRAG);
 
         // player jump
         // note that we need body.blocked rather than body.touching b/c the former applies to tilemap tiles and the latter to the "ground"
         if (!my.sprite.player.body.blocked.down) {
-            my.sprite.player.anims.play('jump');
+            my.sprite.player.anims.play(this.colorState + 'jump');
         }
         if (my.sprite.player.body.blocked.down && Phaser.Input.Keyboard.JustDown(cursors.up)) {
-            my.sprite.player.body.setVelocityY(this.JUMP_VELOCITY);
+            my.sprite.player.body.setVelocityY(playerType.JUMP_VELOCITY);
+        }
+
+        if (my.sprite.player.body.position.y >= this.map.heightInPixels - 16) {
+            console.log("You lose!");
+            console.log(my.sprite.player.body.position.y);
         }
 
         if (Phaser.Input.Keyboard.JustDown(this.rKey)) {

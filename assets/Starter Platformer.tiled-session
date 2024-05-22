@@ -3,20 +3,35 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "platformer-level-1.tmx",
+    "activeFile": "1bit_platformer-level-1.tmj",
     "expandedProjectPaths": [
         "."
     ],
+    "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
         "": {
             "scaleInEditor": 1
         },
-        "platformer-level-1.tmx": {
-            "scale": 1.5,
-            "selectedLayer": 0,
+        "1bit_platformer-level-1.tmj": {
+            "scale": 0.832734375,
+            "selectedLayer": 1,
             "viewCenter": {
-                "x": 176.33333333333334,
-                "y": 219.66666666666663
+                "x": 717.5157144197392,
+                "y": 119.48588047659257
+            }
+        },
+        "1bit_platformer-level-1.tmj#kenny_monochrome_tilemap_packed": {
+            "scaleInDock": 1
+        },
+        "platformer-level-1.tmx": {
+            "expandedObjectLayers": [
+                3
+            ],
+            "scale": 1.5,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 453.66666666666663,
+                "y": 224.99999999999994
             }
         },
         "platformer-level-1.tmx#kenny_tilemap_packed": {
@@ -31,11 +46,12 @@
     "map.tileWidth": 18,
     "map.width": 40,
     "openFiles": [
-        "platformer-level-1.tmx"
+        "1bit_platformer-level-1.tmj"
     ],
     "project": "Starter Platformer.tiled-project",
     "property.type": "bool",
     "recentFiles": [
+        "1bit_platformer-level-1.tmj",
         "platformer-level-1.tmx"
     ],
     "tileset.embedInMap": true,

@@ -15,10 +15,10 @@
         },
         "1bit_platformer-level-1.tmj": {
             "scale": 3,
-            "selectedLayer": 1,
+            "selectedLayer": 3,
             "viewCenter": {
-                "x": 945.1666666666666,
-                "y": 359.5
+                "x": 873.6666666666665,
+                "y": 437.16666666666663
             }
         },
         "1bit_platformer-level-1.tmj#kenny_monochrome_tilemap_packed": {

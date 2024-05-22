@@ -11,12 +11,12 @@ class Load extends Phaser.Scene {
 
         // Load tilemap information
         this.load.image("tilemap_tiles", "monochrome_tilemap_transparent_packed.png");                         // Packed tilemap
-        this.load.tilemapTiledJSON("platformer-level-1", "1bit_platformer-level-1.tmj");   // Tilemap in JSON
+        this.load.tilemapTiledJSON("1bit_platformer-level-1", "1bit_platformer-level-1.tmj");   // Tilemap in JSON
 
         // Load the tilemap as a spritesheet
         this.load.spritesheet("tilemap_sheet", "monochrome_tilemap_transparent_packed.png", {
-            frameWidth: 18,
-            frameHeight: 18
+            frameWidth: 16,
+            frameHeight: 16
         });
 
         // Oooh, fancy. A multi atlas is a texture atlas which has the textures spread
@@ -30,32 +30,120 @@ class Load extends Phaser.Scene {
 
     create() {
         this.anims.create({
-            key: 'walk',
-            frames: this.anims.generateFrameNames('platformer_characters', {
-                prefix: "tile_",
-                start: 0,
-                end: 1,
-                suffix: ".png",
-                zeroPad: 4
-            }),
+            key: 'ory_fly',
+            defaultTextureKey: "tilemap_sheet",
+            frames: [
+                { frame: 341 }, { frame: 342 }, { frame: 343 }
+            ],
+            frameRate: 5,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'yelly_fly',
+            defaultTextureKey: "tilemap_sheet",
+            frames: [
+                { frame: 321 }, { frame: 322 }, { frame: 323 }
+            ],
+            frameRate: 5,
+            repeat: -1
+        });
+
+        this.anims.create({
+            key: 'blue_walk',
+            defaultTextureKey: "tilemap_sheet",
+            frames: [
+                { frame: 241 }, { frame: 242 }, { frame: 243 }
+            ],
+            frameRate: 15,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'green_walk',
+            defaultTextureKey: "tilemap_sheet",
+            frames: [
+                { frame: 261 }, { frame: 262 }, { frame: 263 }
+            ],
+            frameRate: 15,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'red_walk',
+            defaultTextureKey: "tilemap_sheet",
+            frames: [
+                { frame: 281 }, { frame: 282 }, { frame: 283 }
+            ],
+            frameRate: 15,
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'purple_walk',
+            defaultTextureKey: "tilemap_sheet",
+            frames: [
+                { frame: 301 }, { frame: 302 }, { frame: 303 }
+            ],
             frameRate: 15,
             repeat: -1
         });
 
         this.anims.create({
-            key: 'idle',
-            defaultTextureKey: "platformer_characters",
+            key: 'blue_idle',
+            defaultTextureKey: "tilemap_sheet",
             frames: [
-                { frame: "tile_0000.png" }
+                { frame: 240 }
+            ],
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'green_idle',
+            defaultTextureKey: "tilemap_sheet",
+            frames: [
+                { frame: 260 }
+            ],
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'red_idle',
+            defaultTextureKey: "tilemap_sheet",
+            frames: [
+                { frame: 280 }
+            ],
+            repeat: -1
+        });
+        this.anims.create({
+            key: 'purple_idle',
+            defaultTextureKey: "tilemap_sheet",
+            frames: [
+                { frame: 300 }
             ],
             repeat: -1
         });
 
         this.anims.create({
-            key: 'jump',
-            defaultTextureKey: "platformer_characters",
+            key: 'blue_jump',
+            defaultTextureKey: "tilemap_sheet",
             frames: [
-                { frame: "tile_0001.png" }
+                { frame: 245 }
+            ],
+        });
+        this.anims.create({
+            key: 'green_jump',
+            defaultTextureKey: "tilemap_sheet",
+            frames: [
+                { frame: 265 }
+            ],
+        });
+        this.anims.create({
+            key: 'red_jump',
+            defaultTextureKey: "tilemap_sheet",
+            frames: [
+                { frame: 285 }
+            ],
+        });
+        this.anims.create({
+            key: 'purple_jump',
+            defaultTextureKey: "tilemap_sheet",
+            frames: [
+                { frame: 305 }
             ],
         });
 
