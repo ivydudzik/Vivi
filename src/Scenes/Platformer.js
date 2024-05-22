@@ -194,6 +194,9 @@ class Platformer extends Phaser.Scene {
         for (let enemy of this.yellyGroup.getChildren()) {
             enemy.anims.play("yelly_fly");
         }
+
+        this.physics.world.drawDebug = this.physics.world.drawDebug ? false : true
+        this.physics.world.debugGraphic.clear()
     }
 
     modulateTimeScale(timeScale) {
