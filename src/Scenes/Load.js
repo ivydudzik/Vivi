@@ -49,6 +49,17 @@ class Load extends Phaser.Scene {
         });
 
         this.anims.create({
+            key: 'crystal_pulse',
+            defaultTextureKey: "tilemap_sheet",
+            frames: [
+                { frame: 22 }, { frame: 21 }, { frame: 20 }
+            ],
+            frameRate: 5,
+            yoyo: true,
+            repeat: -1
+        });
+
+        this.anims.create({
             key: 'blue_walk',
             defaultTextureKey: "tilemap_sheet",
             frames: [
