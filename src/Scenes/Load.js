@@ -6,9 +6,11 @@ class Load extends Phaser.Scene {
     preload() {
         this.load.setPath("./assets/audio/");
         this.load.audio('theme', '641926__kbrecordzz__scifi-1-1.mp3');
-        // Arcade Music Loop.wav by joshuaempyre -- https://freesound.org/s/251461/ -- License: Attribution 4.0
+        // scifi (1) (1).mp3 by kbrecordzz -- https://freesound.org/s/641926/ -- License: Creative Commons 0
         this.load.audio('win', '699700__8bitmyketison__gameboy-jump-sfx-01.wav');
+        // Gameboy Jump SFX 01.wav by 8bitmyketison -- https://freesound.org/s/699700/ -- License: Creative Commons 0
         this.load.audio('lose', '721794__maodin204__8bit-explosion-3.wav');
+        // 8bit explosion 3 by MaoDin204 -- https://freesound.org/s/721794/ -- License: Creative Commons 0
         this.load.audio('switchColor', 'Switch.wav');
         this.load.audio('slowDown', 'Slow Down.wav');
         this.load.audio('speedUp', 'Speed Up.wav');
