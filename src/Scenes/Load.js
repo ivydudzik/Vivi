@@ -4,6 +4,18 @@ class Load extends Phaser.Scene {
     }
 
     preload() {
+        this.load.setPath("./assets/audio/");
+        this.load.audio('theme', '641926__kbrecordzz__scifi-1-1.mp3');
+        // Arcade Music Loop.wav by joshuaempyre -- https://freesound.org/s/251461/ -- License: Attribution 4.0
+        this.load.audio('win', '699700__8bitmyketison__gameboy-jump-sfx-01.wav');
+        this.load.audio('lose', '721794__maodin204__8bit-explosion-3.wav');
+        this.load.audio('switchColor', 'Switch.wav');
+        this.load.audio('slowDown', 'Slow Down.wav');
+        this.load.audio('speedUp', 'Speed Up.wav');
+        this.load.audio('jump', 'Jump.wav');
+        this.load.audio('coin', 'Coin.wav');
+
+
         this.load.setPath("./assets/");
 
         // Load characters spritesheet
@@ -158,8 +170,13 @@ class Load extends Phaser.Scene {
             ],
         });
 
+        const music = this.sound.add('theme');
+        music.setVolume(0.025);
+        music.setLoop(true);
+        music.play();
+
         // ...and pass to the next Scene
-        this.scene.start("platformerScene");
+        this.scene.start("menuScene");
     }
 
     // Never get here since a new scene is started in create()

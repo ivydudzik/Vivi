@@ -96,7 +96,7 @@ class Platformer extends Phaser.Scene {
         this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 
         // Set up player avatar
-        my.sprite.player = this.physics.add.sprite(2500, 200, "tilemap_sheet");
+        my.sprite.player = this.physics.add.sprite(30, 200, "tilemap_sheet");
         my.sprite.player.setCollideWorldBounds(true);
 
         // Enable collision handling
@@ -107,21 +107,22 @@ class Platformer extends Phaser.Scene {
         // Handle collision detection with coins
         this.physics.add.overlap(my.sprite.player, this.coinGroup, (obj1, obj2) => {
             obj2.destroy(); // remove coin on overlap
+            this.coinSound = this.sound.add('coin');
+            this.coinSound.setVolume(0.05);
+            this.coinSound.play();
+            //this.time.delayedCall(15, this.playCoinSound, [], this);
         });
         // Handle collision detection with yelly enemies
         this.physics.add.overlap(my.sprite.player, this.yellyGroup, (obj1, obj2) => {
-            console.log("You lose!");
-            this.scene.restart();
+            this.lose();
         });
         // Handle collision detection with ory enemies
         this.physics.add.overlap(my.sprite.player, this.orysGroup, (obj1, obj2) => {
-            console.log("You lose!");
-            this.scene.restart();
+            this.lose()
         });
         // Handle collision detection with crystal goal
         this.physics.add.overlap(my.sprite.player, this.crystalsGroup, (obj1, obj2) => {
-            console.log("You win!");
-            this.scene.restart();
+            this.win()
         });
 
         // Set up Phaser-provided cursor key input
@@ -139,23 +140,41 @@ class Platformer extends Phaser.Scene {
         // Add Player Type Switcher
         this.input.keyboard.on('keydown-ONE', () => {
             this.colorState = "blue_";
+            this.blueSound = this.sound.add('switchColor');
+            this.blueSound.setVolume(0.05);
+            this.blueSound.play();
         }, this);
         this.input.keyboard.on('keydown-TWO', () => {
             this.colorState = "green_";
+            this.greenSound = this.sound.add('switchColor');
+            this.greenSound.setVolume(0.05);
+            this.greenSound.play();
         }, this);
         this.input.keyboard.on('keydown-THREE', () => {
             this.colorState = "red_";
+            this.redSound = this.sound.add('switchColor');
+            this.redSound.setVolume(0.05);
+            this.redSound.play();
         }, this);
         this.input.keyboard.on('keydown-FOUR', () => {
             this.colorState = "purple_";
+            this.purpleSound = this.sound.add('switchColor');
+            this.purpleSound.setVolume(0.05);
+            this.purpleSound.play();
         }, this);
 
         // Add Game Rate Switcher
         this.input.keyboard.on('keydown-SPACE', () => {
             if (this.isSlowmo) {
+                this.fastSound = this.sound.add('speedUp');
+                this.fastSound.setVolume(0.05);
+                this.fastSound.play();
                 this.modulateTimeScale(1);
                 this.isSlowmo = false;
             } else {
+                this.slowSound = this.sound.add('slowDown');
+                this.slowSound.setVolume(0.05);
+                this.slowSound.play();
                 this.modulateTimeScale(this.SLOWMO_SPEED);
                 this.isSlowmo = true;
             }
@@ -213,6 +232,26 @@ class Platformer extends Phaser.Scene {
         // Disable debug drawing by default
         this.physics.world.drawDebug = this.physics.world.drawDebug ? false : true
         this.physics.world.debugGraphic.clear()
+
+        // Add Descriptive Text
+        document.getElementById('description').innerHTML = '<h3>ARROW KEYS to move // NUMBERS 1, 2, 3, 4 to switch player color // SPACE to slow down time </h3>'
+    }
+
+    win() {
+        console.log("you win!");
+        this.winSound = this.sound.add('win');
+        this.winSound.setVolume(0.1);
+        this.winSound.play();
+        this.scene.start("winScene");
+    }
+
+    lose() {
+
+        console.log("you lose!");
+        this.loseSound = this.sound.add('lose');
+        this.loseSound.setVolume(0.1);
+        this.loseSound.play();
+        this.scene.start("loseScene");
     }
 
     // Modulate the timescale, including modifying anim timescales
@@ -241,6 +280,12 @@ class Platformer extends Phaser.Scene {
             }
         }
 
+        // my.vfx.walking.setParticleSpeed(this.PARTICLE_VELOCITY * this.time.timeScale, 0);
+        my.vfx.walking.lifespan = 250 / this.time.timeScale;
+        my.vfx.walking.gravityY = -100 * this.time.timeScale * this.time.timeScale;
+
+
+
         // Index the playerSettings based on the current color, and handle physics accordingly
         let playerType = this.playerSettings[this.colorState]
         this.physics.world.gravity.y = playerType.GRAVITY;
@@ -262,6 +307,8 @@ class Platformer extends Phaser.Scene {
             my.vfx.walking.startFollow(my.sprite.player, my.sprite.player.displayWidth / 2 - 10, my.sprite.player.displayHeight / 2 - 5, false);
 
             my.vfx.walking.setParticleSpeed(this.PARTICLE_VELOCITY * this.time.timeScale, 0);
+            my.vfx.walking.lifespan = 250 / this.time.timeScale;
+            my.vfx.walking.gravityY = -100 * this.time.timeScale * this.time.timeScale;
 
             // Only play smoke effect if touching the ground
             if (my.sprite.player.body.blocked.down) {
@@ -279,6 +326,8 @@ class Platformer extends Phaser.Scene {
             my.vfx.walking.startFollow(my.sprite.player, my.sprite.player.displayWidth / 2 - 10, my.sprite.player.displayHeight / 2 - 5, false);
 
             my.vfx.walking.setParticleSpeed(this.PARTICLE_VELOCITY * this.time.timeScale, 0);
+            my.vfx.walking.lifespan = 250 / this.time.timeScale;
+            my.vfx.walking.gravityY = -100 * this.time.timeScale * this.time.timeScale;
 
             // Only play smoke effect if touching the ground
             if (my.sprite.player.body.blocked.down) {
@@ -312,32 +361,37 @@ class Platformer extends Phaser.Scene {
             this.isGrounded = true;
         }
 
-        my.vfx.jumping.stop();
+
 
         // Player Jump
         if (my.sprite.player.body.blocked.down && Phaser.Input.Keyboard.JustDown(cursors.up)) {
+
             my.sprite.player.body.setVelocityY(playerType.JUMP_VELOCITY);
 
-            my.vfx.jumping.startFollow(my.sprite.player, my.sprite.player.displayWidth / 2 - 10, my.sprite.player.displayHeight / 2 - 5, false);
-
+            my.vfx.jumping.setPosition(my.sprite.player.body.position.x + 10, my.sprite.player.body.position.y + 15);
             my.vfx.jumping.setParticleSpeed(this.PARTICLE_VELOCITY * this.time.timeScale, 0);
+            my.vfx.jumping.lifespan = 350 / this.time.timeScale;
+            my.vfx.jumping.gravityY = -100 * this.time.timeScale * this.time.timeScale;
+            my.vfx.jumping.explode(10);
 
-            my.vfx.jumping.start();
-
-            // this.time.delayedCall(1000, my.vfx.jumping.stop, [], this);
-            // this.time.delayedCall(1000, console.log, ["delayed call"], this);
-
+            this.jumpSound = this.sound.add('jump');
+            this.jumpSound.setVolume(0.1);
+            this.jumpSound.play();
         }
 
 
         if (my.sprite.player.body.position.y >= this.map.heightInPixels - 16) {
-            console.log("You lose!");
-            this.scene.restart();
-            console.log(my.sprite.player.body.position.y);
+            this.lose();
         }
 
         if (Phaser.Input.Keyboard.JustDown(this.rKey)) {
             this.scene.restart();
         }
     }
+
+    playCoinSound() {
+        this.coinSound.setVolume(0.05);
+        this.coinSound.play();
+    }
+
 }
